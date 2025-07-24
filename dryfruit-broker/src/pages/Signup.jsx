@@ -22,6 +22,7 @@ function Signup() {
       email,
       userName,
       address,
+      role,
       createdAt: new Date()
     });
 

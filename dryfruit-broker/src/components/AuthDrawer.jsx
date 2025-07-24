@@ -1,4 +1,4 @@
-import {Box, Drawer, Typography, TextField, IconButton, InputAdornment, Button, Divider} from "@mui/material";
+import {Box, Drawer, Typography, TextField, IconButton, InputAdornment, Button, Divider, Snackbar, Alert} from "@mui/material";
 
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
@@ -6,9 +6,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import UserNameIcon from "@mui/icons-material/Person";
 import AddressIcon from "@mui/icons-material/LocationOn";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../features/auth/authSlice";
+import { setUser, logout } from "../features/auth/authSlice";
+import { auth, db } from "../firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 
 const AuthDrawer = ({ open, onClose }) => {
@@ -22,23 +25,105 @@ const AuthDrawer = ({ open, onClose }) => {
   const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
 
+  const [snack, setSnack] = useState({ open: false, message: "", severity: "success" });
+
+  const toggleMode = () => setIsLogin(!isLogin);
+  const handleCloseSnack = () => setSnack({ ...snack, open: false });
+  const resetFields = () => {
+    setEmail("");
+    setPassword("");
+    setUserName("");
+    setAddress("");
+  };
+
+  const handleAuth = async () => {
+    try {
+      if (isLogin) {
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        const profileRef = doc(db, "users", userCred.user.uid);
+
+        const profileSnap = await getDoc(profileRef);
+
+        if (!profileSnap.exists()) throw new Error ("User profile dose not exist in Firestore");
+
+        const profileData = profileSnap.data();
+        dispatch(setUser({ 
+          user : {
+          uid: userCred.user.uid,
+         email: userCred.user.email,
+         displayName: userCred.user.displayName || null,
+        },
+        role : profileData.role || "user",
+      }));
+        setSnack({ open: true, message: "Login successful!", severity: "success" });
+
+        switch (profileData.role) {
+          case "admin":
+            navigate("/admin-dashboard");
+            break;
+          case "dealer":
+            navigate("/dealer-dashboard");
+            break;
+          default:
+            navigate("/profile");
+            break;
+        }
+
+      } else {
+        
+        if (!userName || !address) {
+          return setSnack({ open: true, message: "Please fill all fields", severity: "warning" });
+        }
+
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+
+        
+        const newProfile = {
+          email,
+          userName,
+          address,
+          role: "user",  
+          createdAt: new Date(),
+        };
+
+        await setDoc(doc(db, "users", userCred.user.uid), newProfile);
+
+        dispatch(setUser({
+          user: {
+            uid: userCred.user.uid,
+            email: userCred.user.email,
+            displayName: userCred.user.displayName || null,
+          },
+          role: newProfile.role,
+        }));
+
+        setSnack({ open: true, message: "Signup successful!", severity: "success" });
+        navigate("/profile");
+      }
+
+      resetFields();
+      onClose();
+
+    } catch (error) {
+      console.error("Auth error:", error.message);
+      setSnack({
+        open: true,
+        message: error.message || "Something went wrong",
+        severity: "error"
+      });
+    }
+  };
+
+       
+
   const handleLogout = () => {
     dispatch(logout());
     onClose();
     navigate("/");
   };
 
-  const toggleMode = () => setIsLogin(!isLogin);
-
-  const handleSubmit = () => {
-    if (isLogin) {
-      console.log("Logging in with:", email, password);
-    } else {
-      console.log("Signing up with:", email, userName, address, password);
-    }
-  };
-
   return (
+    <>
     <Drawer anchor="right" open={open} onClose={onClose}>
       <Box sx={{ width: 350, p: 3, position: "relative" }}>
         <IconButton
@@ -136,7 +221,7 @@ const AuthDrawer = ({ open, onClose }) => {
             {isLogin && (
               <Typography
                 variant="body2"
-                sx={{ color: "maroon", mb: 2, textAlign: "right" }}
+                sx={{ color: "maroon", mb: 2, textAlign: "right", cursor:"pointer" }}
               >
                 Forgot Password?
               </Typography>
@@ -145,7 +230,7 @@ const AuthDrawer = ({ open, onClose }) => {
             <Button
               fullWidth
               variant="contained"
-              onClick={handleSubmit}
+              onClick={handleAuth}
               sx={{
                 bgcolor: "maroon",
                 color: "#fff",
@@ -186,6 +271,17 @@ const AuthDrawer = ({ open, onClose }) => {
             </Button>
             <Button
               fullWidth
+              variant="outlined"
+              sx={{ mt: 2 }}
+              onClick={() => {
+              navigate("/orders");
+              onClose();
+                    }}
+           >
+              My Orders
+             </Button>
+            <Button
+              fullWidth
               color="error"
               variant="contained"
               sx={{ mt: 2 }}
@@ -193,10 +289,24 @@ const AuthDrawer = ({ open, onClose }) => {
             >
               Logout
             </Button>
+            
+
           </>
         )}
       </Box>
     </Drawer>
+    <Snackbar
+        open={snack.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnack}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseSnack} severity={snack.severity} sx={{ width: '100%' }}>
+          {snack.message}
+        </Alert>
+      </Snackbar>
+    </>
+      
   );
 };
 

@@ -1,7 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { Box, Toolbar } from '@mui/material';
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
 import { useState } from 'react'
 import React, { useEffect } from "react";
 
@@ -11,12 +9,14 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { onAuthStateChanged } from 'firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
-import { auth } from './firebase';
-import { setUser } from './features/auth/authSlice';
+import { auth, db } from './firebase';
+import { setUser, clearUser } from './features/auth/authSlice';
 
 import './App.css'
 
 import Home from "./pages/Home"; 
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Navbar from "./components/Navbar";
 import About from './pages/About';
 import Contact from "./pages/Contact";
@@ -39,7 +39,7 @@ import uploadDummyData from "./utils/uploadDummyData";
 
 const LayoutWrapper = ({ children }) => {
   const location = useLocation();
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  const isAuthPage = location.pathname === "/login" || location.pathname === "/signup";
 
 
   return (
@@ -62,22 +62,39 @@ const InlineProtectedRoute = ({ element, allowedRoles }) => {
 
 function App() {
   const dispatch = useDispatch();
+  const {user} = useSelector((state) => state.auth );
    useEffect(() => {
    
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const role = localStorage.getItem("role") ;
-        const safeUser = {
-        uid: user.uid,
-        email : user.email,
-        displayName : user.displayName || "",
-         };
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const profileRef = doc(db, "users", firebaseUser.uid);
+          const profileSnap = await getDoc(profileRef);
 
-        dispatch(setUser({ user : safeUser, role }));
+          const role =
+            profileSnap.exists() && profileSnap.data().role
+              ? profileSnap.data().role
+              : "user";
+
+          const safeUser = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            displayName: firebaseUser.displayName || null,
+          };
+
+          dispatch(setUser({ user: safeUser, role }));
+        } catch (error) {
+          console.error("Error fetching user profile from Firestore:", error);
+          dispatch(clearUser());
+        }
+      } else {
+        dispatch(clearUser());
       }
     });
-    return unsubscribe;
+
+    return () => unsubscribe();
   }, [dispatch]);
+
 
 
   return (
@@ -86,8 +103,8 @@ function App() {
       <LayoutWrapper>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={user ? <Navigate to = "/profile" replace/> : <Login />} />
+        <Route path="/signup" element={user ? <Navigate to = "/profile" replace /> : <Signup />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/products" element={<Products />} />
@@ -96,24 +113,84 @@ function App() {
         <Route path="/catalogue" element={<Catalogue />} />
         
         <Route path="/thank-you" element={<ThankYou />} />
-        <Route path="/orders" element={
-            <InlineProtectedRoute element={<OrdersHistory />} allowedRoles={['user', 'dealer']} />} />
-         <Route path="/profile" element={
-            <InlineProtectedRoute element={<Profile />} allowedRoles={['user', 'dealer', 'admin']} />
-          } />
-          <Route path="/dealer-dashboard" element={
-            <InlineProtectedRoute element={<DealerDashboard />} allowedRoles={['dealer']} />
-          } />
-          <Route path="/admin-dashboard" element={
-            <InlineProtectedRoute element={<AdminDashboard />} allowedRoles={['admin']} />
-          } /> 
 
-          <Route path="/checkout" element={
+
+        {/* <Route path="/orders" element={
+            <InlineProtectedRoute element={<OrdersHistory />} allowedRoles={['user', 'dealer']} />} /> */}
+
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute allowedRoles={["user", "dealer"]}>
+                  <OrdersHistory />
+                </ProtectedRoute>
+              }
+            />
+
+
+
+         {/* <Route path="/profile" element={
+            <InlineProtectedRoute element={<Profile />} allowedRoles={['user', 'dealer', 'admin']} />
+          } /> */}
+
+           <Route
+              path="/profile"
+              element={
+                <ProtectedRoute allowedRoles={["user", "dealer", "admin"]}>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+
+
+
+          {/* <Route path="/dealer-dashboard" element={
+            <InlineProtectedRoute element={<DealerDashboard />} allowedRoles={['dealer']} />
+          } /> */}
+
+          <Route
+              path="/dealer-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["dealer"]}>
+                  <DealerDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+
+          {/* <Route path="/admin-dashboard" element={
+            <InlineProtectedRoute element={<AdminDashboard />} allowedRoles={['admin']} />
+          } />  */}
+
+
+          <Route
+              path="/admin-dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+
+          {/* <Route path="/checkout" element={
             <InlineProtectedRoute element={<Checkout />} allowedRoles={["user", "dealer"]} />
-          } />
+          } /> */}
           {/* <Route path="/checkout" element={<Checkout />} /> */}
+          <Route
+              path="/checkout"
+              element={
+                <ProtectedRoute allowedRoles={["user", "dealer"]}>
+                  <Checkout />
+                </ProtectedRoute>
+              }
+            />
+
 
           <Route path="/unauthorized" element={<Unauthorized />} />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+
         
          
         

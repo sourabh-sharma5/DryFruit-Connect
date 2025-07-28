@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { getDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase'; // Make sure you have the db exported
+import { db } from '../../firebase'; 
 
 const userFromStorage = JSON.parse(localStorage.getItem('user'));
 

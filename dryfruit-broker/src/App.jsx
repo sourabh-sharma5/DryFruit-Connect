@@ -10,7 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { onAuthStateChanged } from 'firebase/auth';
 import { useDispatch, useSelector } from 'react-redux';
 import { auth, db } from './firebase';
-import { setUser, clearUser } from './features/auth/authSlice';
+import { setUser } from './features/auth/authSlice';
 
 import './App.css'
 
@@ -173,18 +173,18 @@ function App() {
             />
 
 
-          {/* <Route path="/checkout" element={
+          <Route path="/checkout" element={
             <InlineProtectedRoute element={<Checkout />} allowedRoles={["user", "dealer"]} />
-          } /> */}
+          } />
           {/* <Route path="/checkout" element={<Checkout />} /> */}
-          <Route
+          {/* <Route
               path="/checkout"
               element={
                 <ProtectedRoute allowedRoles={["user", "dealer"]}>
                   <Checkout />
                 </ProtectedRoute>
               }
-            />
+            /> */}
 
 
           <Route path="/unauthorized" element={<Unauthorized />} />

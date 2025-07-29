@@ -1,42 +1,70 @@
-import { AppBar, Grid, Toolbar, Typography, Box, InputBase, IconButton, MenuItem, Select, Drawer, Avatar, Container, Menu, Badge, FormControl, InputLabel } from '@mui/material';
+import { AppBar, Toolbar, Grid, Typography, Box, InputBase, IconButton, MenuItem, Select, Drawer, Avatar, Container, Menu, Badge, FormControl, InputLabel, Divider, List, ListItem, ListItemText } from '@mui/material';
 
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-
-import { useSelector } from 'react-redux';
+import { ShoppingCart } from '@mui/icons-material';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import AuthDrawer from './AuthDrawer';
-import { ShoppingCart } from '@mui/icons-material';
 import ProductDetail from '../pages/ProductDetail';
 import Catalogue from '../pages/Catalogue';
 import Home from '../pages/Home';
 import uploadDummyData from '../utils/uploadDummyData';
 
 const Navbar = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user, role } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.cartItems);
+
+
   const [navDrawerOpen, setNavDrawerOpen] = useState(false);
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
-  const [drawerOpen, setDraweropen] = useState(false);
+ // const [drawerOpen, setDraweropen] = useState(false);
 
-  const cartItems = useSelector((state) => state.cart.cartItems);
+  
   const navigate = useNavigate();
 
 
   const [category, setCategory] = useState('All');
-  const [view, setView] = useState('grid');
-  const categories = ['All', ...new Set(uploadDummyData.map(p => p.category))];
-  const filtered = uploadDummyData
-      .filter(product => (category === 'All' ||  product.category === category)
-      );
+ // const [view, setView] = useState('grid');
+  const categories = ['All', ...Array.from(new Set(uploadDummyData.map(p => p.category)).values())];
+  // const filtered = uploadDummyData
+  //     .filter(product => (category === 'All' ||  product.category === category)
+  //     );
       
-      const getInitials = (name = '') => {
+      const getInitials = (name, email) => {
+        if (name && name.length) {
       return name
       .split(' ')
       .map((n) => n[0])
       .join('')
       .toUpperCase();
-  };
+  };  if (email) return email [0].toUpperCase();
+  return 'U';
+ };   
+  
+  const roleLinks = [];
+  if (role === 'admin') {
+    roleLinks.push(
+      <MenuItem key="admin" component={Link} to="/admin-dashboard" onClick={() => setNavDrawerOpen(false)}>
+        Admin Dashboard
+      </MenuItem>
+    );
+  }
+  if (role === 'dealer') {
+    roleLinks.push(
+      <MenuItem key="dealer" component={Link} to="/dealer-dashboard" onClick={() => setNavDrawerOpen(false)}>
+        Dealer Dashboard
+      </MenuItem>
+    );
+  }
+  if (user) {
+    roleLinks.push(
+      <MenuItem key="profile" component={Link} to="/profile" onClick={() => setNavDrawerOpen(false)}>
+        My Profile
+      </MenuItem>
+    );
+  }
 
   return (
     <AppBar position="sticky" color="default" sx={{ width: '100%', boxShadow: 2 }}>
@@ -84,7 +112,7 @@ const Navbar = () => {
                         onChange={(e) => setCategory(e.target.value)}
                         label="Category"
                       >
-                        {categories.map(cat => (
+                        {categories.map((cat) => (
                           <MenuItem key={cat} value={cat}>{cat}</MenuItem>
                         ))}
                       </Select>
@@ -94,7 +122,7 @@ const Navbar = () => {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                bgcolor: '',
+                
                 px: 2,
                 borderRadius: 1,
                 width: '100%',
@@ -115,10 +143,13 @@ const Navbar = () => {
             </IconButton>
 
             <IconButton onClick={() => setAuthDrawerOpen(true)}>
-              {user?.photoURL ? (
-                <Avatar src={user.photoURL} />
+              {user? (
+                <Avatar  >
+                {getInitials(user.displayName, user.email)}
+                </Avatar>
+
               ) : (
-                <Avatar>{getInitials(user?.name || 'U')}</Avatar>
+                <Avatar> U </Avatar>
               )}
             </IconButton>
             <AuthDrawer open={authDrawerOpen} onClose={() => setAuthDrawerOpen(false)} />
@@ -150,6 +181,8 @@ const Navbar = () => {
           {/* <MenuItem component={Link} to="/productdetail" onClick={() => setNavDrawerOpen(false)}>
             Product Detail
           </MenuItem> */}
+          {user && <Divider sx={{ my: 1 }} />}
+          {roleLinks}
           
         </Box>
       </Drawer>

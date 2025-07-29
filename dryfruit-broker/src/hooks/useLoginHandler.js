@@ -17,14 +17,14 @@ export function useLoginHandler() {
 
       const user = userCredential.user;
 
-      const profileRef = doc(db, "users", user.uid);
-      const profileSnap = await getDoc(profileRef);
+      const profileDoc = doc(db, "users", user.uid);
+      const profileSnap = await getDoc(profileDoc);
 
       if (!profileSnap.exists()) {
         throw new Error("User profile not found in Firestore");
       }
       const profileData = profileSnap.data();
-
+      const role = profileData.role || "user";
       
       dispatch(setUser({
         user: {
@@ -32,7 +32,7 @@ export function useLoginHandler() {
           email: user.email,
           displayName: user.displayName || null,
         },
-        role: profileData.role || "user",
+        role,
       }));
 
     

@@ -24,8 +24,8 @@ function Login() {
     try {
      const userCredential = await signInWithEmailAndPassword (auth, email, password);
 
-     const profileRef = doc(db, "users", userCredential.user.uid);
-     const profileSnap = await getDoc(profileRef);
+     const profileDoc = doc(db, "users", userCredential.user.uid);
+     const profileSnap = await getDoc(profileDoc);
 
      if (profileSnap.exists()) {
       const data = profileSnap.data();
@@ -45,7 +45,7 @@ function Login() {
       );
       navigate ("/profile");
      } else {
-       setError("USer Profile not found in Firestore.");
+       setError("User Profile not found in Firestore.");
 
      }
     } catch (err) {

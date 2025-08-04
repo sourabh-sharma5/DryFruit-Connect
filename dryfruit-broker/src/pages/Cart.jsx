@@ -1,3 +1,4 @@
+import React, {useEffect} from "react";
 import {
   Box,
   Typography,
@@ -11,7 +12,7 @@ import {
 
 } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import { incrementQty, decrementQty, updateQuantity, removeFromCart, clearCart } from '../features/cart/cartSlice';
+import { incrementQty, decrementQty, updateQuantity, removeFromCart, clearCart, syncCart } from '../features/cart/cartSlice';
 import Add from '@mui/icons-material/Add';
 import Remove from '@mui/icons-material/Remove';
 
@@ -23,7 +24,15 @@ import { Link } from 'react-router-dom';
 
 const Cart = () => {
   const cartItems = useSelector((state) => state.cart.cartItems);
+  const {user} = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+
+   useEffect(() => {
+    if (user && user.uid) {
+      dispatch(syncCart({ uid: user.uid, cartItems }));
+    }
+
+  }, [cartItems, user, dispatch]);
 
   const totalPrice = () =>
     cartItems.reduce((total, item) => total + item.price * item.quantity, 0);

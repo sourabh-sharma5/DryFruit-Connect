@@ -1,14 +1,20 @@
-import { doc, setDoc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
 
+import axiosClient from "./axiosClient";
 
-export async function saveCartToFirestore(uid, cartItems) {
-  if (!uid) return;
-  await setDoc(doc(db, "carts", uid), { cartItems });
+export async function fetchCartAPI(uid) {
+  if (!uid) return [];
+  const res = await axiosClient.get(`/cart/${uid}`);
+  return res.data.cartItems || [];
 }
 
-export async function loadCartFromFirestore(uid) {
+/**
+ * Sync (overwrite) the user's cart with given items.
+ * @param {string} uid - User ID
+ * @param {Array} cartItems - Array of cart items
+ * @returns {Promise<Array>} updated cart items array
+ */
+export async function syncCartAPI(uid, cartItems) {
   if (!uid) return [];
-  const snap = await getDoc(doc(db, "carts", uid));
-  return snap.exists() ? snap.data().cartItems : [];
+  const res = await axiosClient.post(`/cart/${uid}`, { cartItems });
+  return res.data.cartItems || [];
 }

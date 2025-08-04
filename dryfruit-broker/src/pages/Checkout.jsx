@@ -1,34 +1,67 @@
-import { Box, Typography, Button } from '@mui/material';
+import React, {useRef, useEffect, useState} from 'react';
+import debounce from 'lodash.debounce';
+import { Box, Typography, Button, CircularProgress, Backdrop } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import { clearCart } from '../features/cart/cartSlice';
+import { clearCart, syncCart } from '../features/cart/cartSlice';
 import { useNavigate } from 'react-router-dom';
 
+import { placeOrderAPI } from '../app/orderApi';
+
+
 const Checkout = () => {
-  const cartItems = useSelector(state => state.cart.cartItems);
+  const cartItems = useSelector((state) => state.cart.cartItems);
+  const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
-  const handlePlaceOrder = () => {
+  const syncCartDebounced = useRef(
+    debounce((uid, cartItems) => {
+      dispatch(syncCart({ uid, cartItems }));
+    }, 1000) 
+  ).current;
+
+  
+  useEffect(() => {
+    if (user && user.uid) {
+      syncCartDebounced(user.uid, cartItems);
+    }
+    
+    return () => {
+      if (syncCartDebounced.cancel) syncCartDebounced.cancel(); 
+        
+      };
+    },
+   [cartItems, user, syncCartDebounced, dispatch]);
+
+  const handlePlaceOrder = async () => {
     const orderDetails = {
       cartItems,
       totalPrice,
-      orderDate: new Date().toLocaleString()
+      orderDate: new Date().toLocaleString(),
     };
+    setLoading(true);
+    try {
+  
+      if (!user || !user.uid) throw new Error("Login required to place an order.");
 
-    
-    localStorage.setItem('lastOrder', JSON.stringify(orderDetails));
+      const orderId = await placeOrderAPI(user.uid, orderDetails);
 
-    const previousOrders = JSON.parse(localStorage.getItem("orders")) || [];
-    const updatedOrders = [...previousOrders, orderDetails];
 
-     localStorage.setItem("orders", JSON.stringify(updatedOrders));
-    dispatch(clearCart());
-    navigate('/thank-you');
+      dispatch(clearCart());
+      dispatch(syncCart({ uid: user.uid, cartItems: [] }));
+      navigate("/thank-you", {state: { order: {...orderDetails, id : orderId }}} );
+    } catch (err) {
+      
+      alert("Failed to place order: " + (err.message || "Unknown error"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,18 +74,25 @@ const Checkout = () => {
           <Typography variant="h6" mb={2}>Order Summary:</Typography>
           {cartItems.map((item) => (
             <Box key={item.id} sx={{ mb: 1 }}>
-              <Typography>{item.name} × {item.quantity} — ₹{item.price * item.quantity}</Typography>
+              <Typography>{item.name} × {item.quantity} — ₹{(item.price * item.quantity).toFixed(2)}</Typography>
             </Box>
           ))}
-          <Typography variant="h6" mt={2}>Total: ₹{totalPrice}</Typography>
+          <Typography variant="h6" mt={2}>Total: ₹{totalPrice.toFixed(2)}</Typography>
           <Button
             variant="contained"
             color="primary"
             sx={{ mt: 3 }}
             onClick={handlePlaceOrder}
+            disabled={loading}
+            endIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
           >
-            Place Order
+           {loading ? "Placing Order..." : "Place Order"}
+
           </Button>
+
+           <Backdrop open={loading} sx={{ zIndex: 10, color: "#fff" }}>
+           <CircularProgress color="inherit" />
+          </Backdrop>
         </>
       )}
     </Box>

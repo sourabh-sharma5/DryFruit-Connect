@@ -18,8 +18,13 @@
     "@tailwindcss/vite": "^4.1.11",
     "aos": "^2.3.4",
     "autoprefixer": "^10.4.21",
+    "axios": "^1.11.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "firebase": "^11.9.1",
+    "firebase-admin": "^13.4.0",
     "framer-motion": "^12.23.6",
+    "lodash.debounce": "^4.0.8",
     "postcss": "^8.5.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -29,7 +34,8 @@
     "react-toastify": "^11.0.5",
     "recharts": "^3.1.0",
     "slick-carousel": "^1.8.1",
-    "tailwindcss": "^4.1.11"
+    "tailwindcss": "^4.1.11",
+    "yup": "^1.7.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",

@@ -1,70 +1,43 @@
-import React, {useState} from 'react';
-import { useSelector } from 'react-redux';
-import { Box, Typography, Paper,  List,
-  ListItem,
-  ListItemText,
-  Chip,
-  Divider } from '@mui/material';
-
-  const dummyUsers = [
-  { id: 1, name: 'Aniket', email: 'aniket@example.com', role: 'user' },
-  { id: 2, name: 'Dealer', email: 'dealer@example.com', role: 'dealer' },
-  { id: 3, name: 'Admin', email: 'admin@example.com', role: 'admin' }
-];
+import React, { useState } from "react";
+import AdminNavbar from "../components/Admin/AdminNavbar";
+import AdminUserTable from "../components/Admin/AdminUserTable";
+import AdminOrderTable from "../components/Admin/AdminOrderTable";
+import { Box, Tabs, Tab, Typography } from "@mui/material";
+import { useSelector } from "react-redux";
 
 const AdminDashboard = () => {
-  const { user, role } = useSelector((state) => state.auth);
-  const [users] = useState(dummyUsers);
+  const { role } = useSelector((state) => state.auth);
+  const [tab, setTab] = useState(0);
+
+  
+  if (role !== "admin") {
+    return (
+      <Box sx={{ p: 6, textAlign: "center" }}>
+        <Typography variant="h5" color="error">
+          Access denied. Admins only.
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Admin Dashboard
-      </Typography>
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6">
-          Hello Admin: {user?.displayName || user?.email}
-        </Typography>
-        <Typography sx={{ mt: 1 }}>
-          You are logged in as <strong>{role}</strong>.
-        </Typography>
-        <Typography sx={{ mt: 2 }}>
-           View and manage all users, dealers, and orders.
-        </Typography>
-        <Typography>
-           Monitor product performance and app activity.
-        </Typography>
-      </Paper>
-
-         <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          All Registered Users
-        </Typography>
-        <List>
-          {users.map((u, index) => (
-            <React.Fragment key={u.id}>
-              <ListItem>
-                <ListItemText
-                  primary={u.name}
-                  secondary={u.email}
-                />
-                <Chip
-                  label={u.role}
-                  color={
-                    u.role === 'admin'
-                      ? 'error'
-                      : u.role === 'dealer'
-                      ? 'warning'
-                      : 'primary'
-                  }
-                />
-              </ListItem>
-              {index < users.length - 1 && <Divider />}
-            </React.Fragment>
-          ))}
-        </List>
-      </Paper>
-    </Box>
+    
+      
+      <Box sx={{ p: 3 }}>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
+          <Tab label="Users" />
+          <Tab label="Orders" />
+          <Tab label="Products" />
+        </Tabs>
+        {tab === 0 && <AdminUserTable />}
+        {tab === 1 && <AdminOrderTable />}
+        {tab === 2 && (
+          <Typography variant="h6" color="text.secondary" sx={{ mt: 2 }}>
+            Product Management coming soon!
+          </Typography>
+        )}
+      </Box>
+    
   );
 };
 

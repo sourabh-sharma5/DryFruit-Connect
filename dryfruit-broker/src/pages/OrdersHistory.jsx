@@ -5,7 +5,7 @@ import {
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { getUserOrdersAPI } from "../app/orderApi";
+import { getUserOrders } from "../app/orderApi";
 import { Timestamp } from "firebase/firestore";
 
 function formatDate(tsOrStr) {

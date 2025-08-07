@@ -5,12 +5,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { clearCart, syncCart } from '../features/cart/cartSlice';
 import { useNavigate } from 'react-router-dom';
 
-import { placeOrderAPI } from '../app/orderApi';
+import { placeOrderToFirestore } from '../app/orderApi';
 
 
 const Checkout = () => {
-  const cartItems = useSelector((state) => state.cart.cartItems);
-  const user = useSelector((state) => state.auth.user);
+  const cartItems = useSelector(state => state.cart.cartItems);
+  const user = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -39,25 +39,28 @@ const Checkout = () => {
     },
    [cartItems, user, syncCartDebounced, dispatch]);
 
-  const handlePlaceOrder = async () => {
+  
+
+const handlePlaceOrder = async () => {
+    if (!user || !user.uid) {
+      alert("Login required to place an order.");
+      return;
+    }
+
     const orderDetails = {
       cartItems,
       totalPrice,
-      orderDate: new Date().toLocaleString(),
+      orderDate: new Date().toISOString(),
     };
+
     setLoading(true);
     try {
-  
-      if (!user || !user.uid) throw new Error("Login required to place an order.");
-
-      const orderId = await placeOrderAPI(user.uid, orderDetails);
-
+      const orderId = await placeOrderToFirestore(user.uid, orderDetails);
 
       dispatch(clearCart());
       dispatch(syncCart({ uid: user.uid, cartItems: [] }));
-      navigate("/thank-you", {state: { order: {...orderDetails, id : orderId }}} );
+      navigate('/thank-you', { state: { order: { ...orderDetails, id: orderId } } });
     } catch (err) {
-      
       alert("Failed to place order: " + (err.message || "Unknown error"));
     } finally {
       setLoading(false);

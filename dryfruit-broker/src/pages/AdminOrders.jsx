@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { getAllOrdersAPI } from "../app/orderApi";
+import { getAllOrders } from "../app/orderApi";
 
 const AdminOrders = () => {
   const { user, role } = useSelector((state) => state.auth);

@@ -25,9 +25,7 @@ const Home = () => {
 
 <Container maxWidth="xl" sx={{ mt: 5 }}>
         <Box data-aos="fade-up">
-          {/* <Typography variant="h5" fontWeight={600} mb={2}>
-            Shop by Category
-          </Typography> */}
+          
           <CategoryScroll />
         </Box>
 

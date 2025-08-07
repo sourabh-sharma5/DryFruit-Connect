@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import {Box, TextField, Button, Typography, Paper} from "@mui/material";
-import { Link, useNavigate, useNavigation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
@@ -21,6 +21,10 @@ function Login() {
 
   const handleLogin = async () => {
   setError(""); 
+   if (!email.trim() || !password.trim()) {
+      setError("Please enter both email and password.");
+      return;
+    }
     try {
      const userCredential = await signInWithEmailAndPassword (auth, email, password);
 
@@ -35,7 +39,7 @@ function Login() {
          user : {
         uid: userCredential.user.uid,
         email: userCredential.user.email,
-        displayName: userCredential.user.displayName ||  null,
+        displayName: userCredential.user.displayName || data.displayName ||  null,
         },
         role: data.role || "user",
         
@@ -61,8 +65,8 @@ function Login() {
       <Paper sx={{ p: 4, width: 400 }}>
         
         <Typography variant="h5" mb={2}>Login</Typography>
-        <TextField fullWidth label="Email" value={email} onChange={(e) => setEmail(e.target.value)} margin="normal" />
-        <TextField fullWidth label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} margin="normal" />
+        <TextField fullWidth label="Email" value={email} onChange={(e) => setEmail(e.target.value)} margin="normal"  />
+        <TextField fullWidth label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} margin="normal"  />
 
           {error && (
           <Typography variant="body2" color="error" mt={1}>

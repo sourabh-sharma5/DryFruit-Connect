@@ -1,7 +1,6 @@
 import { Box, Typography, Card, CardActionArea, CardMedia, CardContent,IconButton } from "@mui/material";
-//import AOS from "aos";
+
 import { useEffect, useRef } from "react";
-import "aos/dist/aos.css";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -94,91 +93,3 @@ const CategoryScroll = () => {
 };
 
 export default CategoryScroll;
-
-
-
-
-
-
-// return (
-//  <Box sx={{  my: 6, px: 3 }}>
-// <Typography variant="h5" fontWeight={600} sx={{ mb: 2, px: 2 }}>
-//          Browse Categories
-//        </Typography>
-
-//   <IconButton
-//     onClick={() => scroll('left')}
-//     sx={{
-//       position: 'absolute',
-//       top: '50%',
-//       left: 0,
-//       transform: 'translateY(-50%)',
-//       zIndex: 2,
-//       bgcolor: 'white',
-//       boxShadow: 1,
-//     }}
-//   >
-//     <ArrowBackIosNewIcon />
-//   </IconButton>
-
-//   <IconButton
-//     onClick={() => scroll('right')}
-//     sx={{
-//       position: 'absolute',
-//       top: '50%',
-//       right: 0,
-//       transform: 'translateY(-50%)',
-//       zIndex: 2,
-//       bgcolor: 'white',
-//       boxShadow: 1,
-//     }}
-//   >
-//     <ArrowForwardIosIcon />
-//   </IconButton>
-
-//   <Box
-//     ref={scrollRef}
-//     sx={{
-//       display: 'flex',
-//       overflowX: 'auto',
-//       scrollBehavior: 'smooth',
-//       gap: 2,
-//       px: 5,
-//       py: 2,
-//       '&::-webkit-scrollbar': { display: 'none' },
-//     }}
-//   >
-//     {categories.map((cat) => (
-//       <Box
-//         key={cat.name}
-//         data-aos="fade-up"
-//         onClick={() => navigate(`/products/${cat.path}`)}
-//         sx={{
-//           minWidth: 160,
-//           cursor: 'pointer',
-//           textAlign: 'center',
-//           transition: 'transform 0.3s',
-//           '&:hover': { transform: 'scale(1.05)' },
-//         }}
-//       >
-//         <Box
-//           component="img"
-//           src={cat.image}
-//           alt={cat.name}
-//           sx={{
-//             width: '100%',
-//             height: 120,
-//             borderRadius: 2,
-//             objectFit: 'cover',
-//             boxShadow: 2,
-//           }}
-//         />
-//         <Typography mt={1}>{cat.name}</Typography>
-//       </Box>
-//     ))}
-//   </Box>
-// </Box>
-// );
-// };
-
-// export default CategoryScroll;

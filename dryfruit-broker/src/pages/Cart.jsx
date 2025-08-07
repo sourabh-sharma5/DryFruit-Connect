@@ -95,10 +95,7 @@ const Cart = () => {
                       <Typography sx={{ mx: 1 }}>{item.quantity}</Typography>
 
                       
-                        {/* //size="small"
-                        // onClick={() => */}
-                        {/* //   dispatch(incrementQty( item.id ))}> */}
-                         {/* //<Typography sx={{ mx: 1 }}>{item.quantity}</Typography> */}
+                        
                          <IconButton onClick={() => dispatch(incrementQty(item.id))}>
                       
                         <Add />

@@ -19,7 +19,7 @@ const Navbar = () => {
 
   const [navDrawerOpen, setNavDrawerOpen] = useState(false);
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
- // const [drawerOpen, setDraweropen] = useState(false);
+ 
 
   
   const navigate = useNavigate();

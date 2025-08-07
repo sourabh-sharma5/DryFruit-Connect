@@ -92,11 +92,7 @@ const Catalogue = () => {
           
         </ToggleButtonGroup>
 
-
-
       </Box>
-
-      
       <Grid container spacing={3}>
         {filtered.map((product) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={product.id} data-aos="fade-up" display="flex" justifyContent="center">

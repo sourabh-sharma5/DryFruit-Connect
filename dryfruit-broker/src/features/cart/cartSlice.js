@@ -1,9 +1,6 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> c26ae444bc3c6d737d929a6915c658c9854b5bf3
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { loadCartFromFirestore, saveCartToFirestore } from "@/app/cartApi";
+
 
 export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
@@ -18,16 +15,13 @@ export const syncCart = createAsyncThunk(
   async ({ uid, cartItems }) => {
     if (!uid) throw new Error("No user id provided for syncing cart.");
     await saveCartToFirestore(uid, cartItems);
+  
     return cartItems;
   }
 );
 
-<<<<<<< HEAD
-const syncGuestCartOnLogin = (uid, guestCart) => async (dispatch) => {
-=======
 
- const syncGuestCartOnLogin = (uid, guestCart) => async (dispatch) => {
->>>>>>> c26ae444bc3c6d737d929a6915c658c9854b5bf3
+const syncGuestCartOnLogin = (uid, guestCart) => async (dispatch) => {
   if (!uid || !guestCart.length) return;
   await saveCartToFirestore(uid, guestCart);
   await dispatch(fetchCart(uid));
@@ -43,10 +37,6 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-<<<<<<< HEAD
-=======
-    
->>>>>>> c26ae444bc3c6d737d929a6915c658c9854b5bf3
     addToCart(state, action) {
       const item = action.payload;
       const existItem = state.cartItems.find((i) => i.id === item.id);
@@ -56,11 +46,7 @@ const cartSlice = createSlice({
         state.cartItems.push({ ...item, quantity: 1 });
       }
     },
-<<<<<<< HEAD
-=======
 
-    
->>>>>>> c26ae444bc3c6d737d929a6915c658c9854b5bf3
     updateQuantity(state, action) {
       const { id, quantity } = action.payload;
       const item = state.cartItems.find((i) => i.id === id);
@@ -71,30 +57,18 @@ const cartSlice = createSlice({
         }
       }
     },
-<<<<<<< HEAD
-    removeFromCart(state, action) {
-      state.cartItems = state.cartItems.filter((i) => i.id !== action.payload);
-    },
-=======
 
-    
     removeFromCart(state, action) {
       state.cartItems = state.cartItems.filter((i) => i.id !== action.payload);
     },
 
-
->>>>>>> c26ae444bc3c6d737d929a6915c658c9854b5bf3
     incrementQty(state, action) {
       const item = state.cartItems.find((i) => i.id === action.payload);
       if (item) {
         item.quantity += 1;
       }
     },
-<<<<<<< HEAD
-=======
 
-    
->>>>>>> c26ae444bc3c6d737d929a6915c658c9854b5bf3
     decrementQty(state, action) {
       const item = state.cartItems.find((i) => i.id === action.payload);
       if (item) {
@@ -104,23 +78,16 @@ const cartSlice = createSlice({
         }
       }
     },
-<<<<<<< HEAD
-    clearCart(state) {
-      state.cartItems = [];
-    },
-=======
 
-    
     clearCart(state) {
       state.cartItems = [];
     },
 
-    
->>>>>>> c26ae444bc3c6d737d929a6915c658c9854b5bf3
     setCart(state, action) {
       state.cartItems = action.payload;
     },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchCart.pending, (state) => {
